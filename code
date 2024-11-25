@@ -1,0 +1,258 @@
+#include <bits/stdc++.h>
+using namespace std;
+class Product {
+public:
+    string name;
+    string brand;
+    double price;
+    Product(string name, string brand, double price)
+        : name(name), brand(brand), price(price) {}
+    virtual void display() const = 0; 
+};
+class Electronics : public Product {
+public:
+    Electronics(string name, string brand, double price)
+        : Product(name, brand, price) {}
+    void display() const override {
+        cout << "Electronics: " << name << " by " << brand << " for $" << price << endl;
+    }
+};
+class Fashion : public Product {
+public:
+    Fashion(string name, string brand, double price)
+        : Product(name, brand, price) {}
+    void display() const override {
+        cout << "Fashion: " << name << " by " << brand << " for $" << price << endl;
+    }
+};
+class HomeAppliance : public Product {
+public:
+    HomeAppliance(string name, string brand, double price)
+        : Product(name, brand, price) {}
+    void display() const override {
+        cout << "Home Appliance: " << name << " by " << brand << " for $" << price << endl;
+    }
+};
+class Book : public Product {
+public:
+    Book(string name, string author, double price)
+        : Product(name, author, price) {}
+    void display() const override {
+        cout << "Book: " << name << " by " << brand << " for $" << price << endl;
+    }
+};
+class Sports : public Product {
+public:
+    Sports(string name, string brand, double price)
+        : Product(name, brand, price) {}
+    void display() const override {
+        cout << "Sports: " << name << " by " << brand << " for $" << price << endl;
+    }
+};
+class User {
+private:
+    string name;
+    string email;
+    string password;
+    string phoneNumber;
+    string address;
+    vector<string> cart;
+    vector<string> purchaseHistory;
+public:
+    User(string name, string email, string password, string phoneNumber, string address)
+        : name(name), email(email), password(password), phoneNumber(phoneNumber), address(address) {}
+    string getName() const { return name; }
+    string getEmail() const { return email; }
+    bool authenticate(const string &inputEmail, const string &inputPassword) const {
+        return email == inputEmail && password == inputPassword;
+    }
+    void addToCart(const string &product) {
+        cart.push_back(product);
+        cout << product << " has been added to your cart." << endl;
+    }
+    void purchaseItem(const string &product) {
+        purchaseHistory.push_back(product);
+        cout << "Purchased: " << product << endl;
+    }
+    void displayCart() const {
+        if (cart.empty()) {
+            cout << "Your cart is empty." << endl;
+        } else {
+            cout << "Items in your cart:\n";
+            for (const auto &item : cart) {
+                cout << item << endl;
+            }
+        }
+    }
+    void displayPurchases() const {
+        if (purchaseHistory.empty()) {
+            cout << "You haven't made any purchases yet." << endl;
+        } else {
+            cout << "Your purchase history:\n";
+            for (const auto &item : purchaseHistory) {
+                cout << item << endl;
+            }
+        }
+    }
+};
+User *loginUser(vector<User *> &users) {
+    string email, password;
+    cout << "Enter your email: ";
+    cin >> email;
+    cout << "Enter your password: ";
+    cin >> password;
+    for (auto user : users) {
+        if (user->authenticate(email, password)) {
+            cout << "Login successful! Welcome, " << user->getName() << "!" << endl;
+            return user;
+        }
+    }
+    cout << "Invalid email or password." << endl;
+    return nullptr;
+}
+void registerNewUser(vector<User *> &users) {
+    string name, email, password, phoneNumber, address;
+    cout << "Enter your name: ";
+    cin.ignore();
+    getline(cin, name);
+    cout << "Enter your email: ";
+    cin >> email;
+    cout << "Enter your password: ";
+    cin >> password;
+    cout << "Enter your phone number (10 digits): ";
+    cin >> phoneNumber;
+    cout << "Enter your address: ";
+    cin.ignore();
+    getline(cin, address);
+    users.push_back(new User(name, email, password, phoneNumber, address));
+    cout << "Registration successful!" << endl;
+}
+void displayCategories(User *loggedInUser, vector<Product *> &electronics, vector<Product *> &fashion,
+                       vector<Product *> &homeAppliances, vector<Product *> &books, vector<Product *> &sports) {
+    while (true) {
+        cout << "\nSelect a category to browse:\n";
+        cout << "1. Electronics\n2. Fashion\n3. Home Appliances\n4. Books\n5. Sports\n6. Exit\n";
+        int choice;
+        cin >> choice;
+        vector<Product *> selectedCategory;
+        switch (choice) {
+        case 1: selectedCategory = electronics; break;
+        case 2: selectedCategory = fashion; break;
+        case 3: selectedCategory = homeAppliances; break;
+        case 4: selectedCategory = books; break;
+        case 5: selectedCategory = sports; break;
+        case 6: return;
+        default:
+            cout << "Invalid choice, try again." << endl;
+            continue;
+        }
+        cout << "\nProducts available:\n";
+        for (size_t i = 0; i < selectedCategory.size(); ++i) {
+            cout << i + 1 << ". ";
+            selectedCategory[i]->display();
+        }
+        int productChoice;
+        cout << "Select a product to view details: ";
+        cin >> productChoice;
+        if (productChoice < 1 || productChoice > selectedCategory.size()) {
+            cout << "Invalid choice, returning to category selection." << endl;
+            continue;
+        }
+        Product *selectedProduct = selectedCategory[productChoice - 1];
+        cout << "\nWhat would you like to do with this product?\n";
+        cout << "1. Add to Cart\n2. Buy Now\n3. Return to Categories\n";
+        int action;
+        cin >> action;
+        switch (action) {
+        case 1:
+            loggedInUser->addToCart(selectedProduct->name);
+            break;
+        case 2:
+            loggedInUser->purchaseItem(selectedProduct->name);
+            break;
+        case 3:
+            continue; // Return to categories
+        default:
+            cout << "Invalid choice, returning to categories." << endl;
+        }
+    }
+}
+int main() {
+    vector<User *> users;
+    vector<Product *> electronics = {
+        new Electronics("Smartphone", "Brand A", 699.99),
+        new Electronics("Laptop", "Brand B", 1299.99),
+        new Electronics("Smart TV", "Brand C", 799.99),
+        new Electronics("Tablet", "Brand D", 399.99),
+        new Electronics("Smartwatch", "Brand E", 249.99)
+    };
+    vector<Product *> fashion = {
+        new Fashion("T-Shirt", "Brand D", 19.99),
+        new Fashion("Jeans", "Brand E", 39.99),
+        new Fashion("Jacket", "Brand F", 89.99),
+        new Fashion("Sneakers", "Brand G", 59.99),
+        new Fashion("Dress", "Brand H", 49.99)
+    };
+    vector<Product *> homeAppliances = {
+        new HomeAppliance("Refrigerator", "Brand F", 499.99),
+        new HomeAppliance("Washing Machine", "Brand G", 349.99),
+        new HomeAppliance("Microwave", "Brand H", 99.99),
+        new HomeAppliance("Vacuum Cleaner", "Brand I", 79.99),
+        new HomeAppliance("Air Conditioner", "Brand J", 499.99)
+    };
+    vector<Product *> books = {
+        new Book("C++ Programming", "Author A", 29.99),
+        new Book("Design Patterns", "Author B", 24.99),
+        new Book("The Great Gatsby", "F. Scott Fitzgerald", 10.99),
+        new Book("To Kill a Mockingbird", "Harper Lee", 12.99),
+        new Book("1984", "George Orwell", 14.99)
+    };
+    vector<Product *> sports = {
+        new Sports("Basketball", "Brand H", 24.99),
+        new Sports("Tennis Racket", "Brand I", 49.99),
+        new Sports("Football", "Brand J", 29.99),
+        new Sports("Baseball Bat", "Brand K", 39.99),
+        new Sports("Soccer Ball", "Brand L", 19.99)
+    };
+    cout << "\tWELCOME TO OUR ECOMMERCE PLATFORM\t" << endl;
+    while (true) {
+        cout << "Are you an existing user? (1 for Yes, 2 for No, 3 to Exit): ";
+        int choice;
+        cin >> choice;
+        User *loggedInUser = nullptr;
+        if (choice == 1) {
+            loggedInUser = loginUser(users);
+            if (!loggedInUser) continue;
+        } else if (choice == 2) {
+            registerNewUser(users);
+            loggedInUser = users.back();
+        } else if (choice == 3) {
+            break;
+        }
+        while (loggedInUser) {
+            cout << "\nWhat would you like to do?\n";
+            cout << "1. Browse Items\n2. View Cart\n3. View Purchases\n4. Logout\n";
+            int action;
+            cin >> action;
+            if (action == 1) {
+                displayCategories(loggedInUser, electronics, fashion, homeAppliances, books, sports);
+            } else if (action == 2) {
+                loggedInUser->displayCart();
+            } else if (action == 3) {
+                loggedInUser->displayPurchases();
+            } else if (action == 4) {
+                cout << "Logging out." << endl;
+                loggedInUser = nullptr;
+            } else {
+                cout << "Invalid choice, try again." << endl;
+            }
+        }
+    }
+    for (auto user : users) delete user;
+    for (auto product : electronics) delete product;
+    for (auto product : fashion) delete product;
+    for (auto product : homeAppliances) delete product;
+    for (auto product : books) delete product;
+    for (auto product : sports) delete product;
+    return 0;
+}
